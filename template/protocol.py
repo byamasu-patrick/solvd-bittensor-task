@@ -17,8 +17,10 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
+import datetime
 import typing
 import bittensor as bt
+from pydantic import BaseModel, Field
 
 # TODO(developer): Rewrite with your protocol definition.
 
@@ -74,3 +76,42 @@ class Dummy(bt.Synapse):
         5
         """
         return self.dummy_output
+    
+class Transaction(BaseModel): 
+    name: str = Field(
+        description="The name of the receiver to send the crypto to"
+    )
+    amount: int 
+
+class NonceHash(bt.Synapse):
+    
+    """
+    A simple dummy protocol representation which uses bt.Synapse as its base.
+    This protocol helps in handling NonceHash request and response communication between
+    the miner and the validator.
+
+    Attributes:
+    - previous_hash: Previous generated hash.
+    - timestamp: It represent the time which a particular hash is been created
+    - data: Containing transaction details to be sent to a particular block
+    - nonce: Predefined data nonce values
+    """
+    block_id: int
+    # Required to generated a new hash
+    previous_hash: str
+    timestamp: datetime
+    data: Transaction
+    nonce: int = 57
+    target_hash: str
+
+    def deserialize(self) -> int:
+        """
+        Deserialize the dummy output. This method retrieves the response from
+        the miner in the form of target_hash, deserializes it and returns it
+        as the output of the dendrite.query() call.
+
+        Returns:
+        - str: The deserialized response, which in this case is the value of target_hash.
+
+        """
+        return self.target_hash

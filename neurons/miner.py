@@ -16,7 +16,7 @@
 # THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
+import hashlib
 import time
 import typing
 import bittensor as bt
@@ -58,8 +58,41 @@ class Miner(BaseMinerNeuron):
         The 'forward' function is a placeholder and should be overridden with logic that is appropriate for
         the miner's intended operation. This method demonstrates a basic transformation of input data.
         """
-        # TODO(developer): Replace with actual implementation logic.
+        
         synapse.dummy_output = synapse.dummy_input * 2
+        return synapse
+    
+    
+    async def forward(
+        self, synapse: template.protocol.NonceHash
+    ) -> template.protocol.NonceHash:
+        """
+        Processes the incoming 'NonceHash' synapse by computing a hash which will then be valiated by the validator operation on the input data.
+
+        Args:
+            synapse (template.protocol.NonceHash): The synapse object containing the 'basic hashing details' data.
+
+        Returns:
+            template.protocol.Dummy: The synapse object with the 'dummy_output' field set to twice the 'dummy_input' value.
+
+        The 'forward' function is a placeholder and should be overridden with logic that is appropriate for
+        the miner's intended operation. This method demonstrates a basic transformation of input data.
+        """
+        # TODO(developer): Replace with actual implementation logic.
+        sha = hashlib.sha256()
+
+        sha.update(
+            str(synapse.index).encode('utf-8') +
+            str(synapse.previous_hash).encode('utf-8') +
+            str(synapse.timestamp).encode('utf-8') +
+            str(synapse.data).encode('utf-8') +
+            str(synapse.nonce).encode('utf-8')
+        )
+
+        synapse_output = sha.hexdigest()
+
+        synapse.target_hash = synapse_output
+        
         return synapse
 
     async def blacklist(
